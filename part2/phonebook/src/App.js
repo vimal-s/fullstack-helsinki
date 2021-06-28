@@ -1,4 +1,5 @@
-import { useState } from "react";
+import axios from "axios";
+import { useEffect, useState } from "react";
 
 const Input = ({ value, onChange }) => (
   <input value={value} onChange={onChange} />
@@ -31,19 +32,25 @@ const Persons = ({ persons }) => (
 );
 
 const App = () => {
-  const [persons, setPersons] = useState([
-    { name: "Arto Hellas", phone: "040-123456" },
-    { name: "Ada Lovelace", phone: "39-44-5323523" },
-    { name: "Dan Abramov", phone: "12-43-234345" },
-    { name: "Mary Poppendieck", phone: "39-23-6423122" },
-  ]);
+  const [persons, setPersons] = useState([]);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [nameToFilter, setNameToFilter] = useState("");
 
+  useEffect(() => {
+    axios
+      .get("http://localhost:3001/persons")
+      .then((response) => setPersons(response.data))
+      .catch((error) => console.log("error occured", error))
+      .then(() => console.log("cleanup tasks"));
+  }, []);
+
   const addDetails = (event) => {
     event.preventDefault();
 
+    // todo: do you want to restrict user to add only digits in phone
+
+    // todo: may have to check empty name and name with only space before adding
     const found = persons.some(
       (person) => person.name.toLowerCase() === name.toLowerCase()
     );
@@ -76,7 +83,7 @@ const App = () => {
         filter names conatining{" "}
         <Input value={nameToFilter} onChange={changeNameToFilter} />
       </div>
-      <h2>Add new</h2>
+      <h2>Add new detail</h2>
       <Form
         name={name}
         phone={phone}
@@ -84,7 +91,7 @@ const App = () => {
         onPhoneChange={changePhone}
         onSubmit={addDetails}
       />
-      <h2>Numbers</h2>
+      <h2>Name and Numbers</h2>
       <Persons persons={personsToShow} />
     </div>
   );
